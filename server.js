@@ -89,6 +89,29 @@ app.post('/translators/submit-feedback/:translator_id', (req, res) => {
   });
 });
 
+app.post('/translators/update-description/:translator_id', (req, res) => {
+    const { translator_id } = req.params;
+    const { description } = req.body;
+  
+    if (description === undefined) {
+      return res.status(400).json({ error: 'Description must be provided' });
+    }
+  
+    const sqlUpdate = `UPDATE translators SET description = ? WHERE translator_id = ?`;
+  
+    db.run(sqlUpdate, [description, translator_id], function(err) {
+      if (err) {
+        console.error(`Ошибка при обновлении описания для переводчика с ID ${translator_id}: ${err.message}`);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Translator not found' });
+      }
+      res.json({ message: 'Description updated successfully', changes: this.changes });
+    });
+  });
+  
+
 app.get('/feedback/data/:translator_id', (req, res) => {
   console.log('Запрос к /feedback/count');
   const { translator_id } = req.params;
