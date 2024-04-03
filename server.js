@@ -176,6 +176,27 @@ app.get('/translators/search', async (req, res) => {
   });
 });
 
+app.get('/feedback/count/:translator_id', (req, res) => {
+    const { translator_id } = req.params;
+    const sql = `SELECT COUNT(*) AS count FROM feedback WHERE translator_id = ?`;
+
+    db.get(sql, [translator_id], (err, row) => {
+        if (err) {
+            console.error(`Ошибка при получении количества отзывов: ${err.message}`);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+        if (row) {
+            res.json({
+                translator_id: translator_id,
+                feedbackCount: row.count
+            });
+        } else {
+            res.status(404).json({ error: 'Feedback not found for this translator' });
+        }
+    });
+});
+
 
 app.get('/feedback/:translator_id', (req, res) => {
   const { translator_id } = req.params;
